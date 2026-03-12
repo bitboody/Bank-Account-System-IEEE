@@ -18,28 +18,37 @@ class User:
         return f"Username: {self.name}\nID: {self.user_id}\nEmail: {self.email}"
 
     def check_balance(self):
-        return f"Account Balance: ${self.balance}"
+        if not self.banned:
+            return f"Account Balance: ${self.balance}"
+        else:
+            return f"You are banned from using our banking system, please contact an Admin."
 
     def deposit(self, amount):
-        try:
-            amount = int(amount)
-            self.balance = self.balance + amount
-        except:
-            return f"Transaction failed: An error has occured."
-        finally:
-            return f"Successfully deposited ${amount}. {self.check_balance()}."
-
-    def withdraw(self, amount):
-        amount = int(amount)
-        if self.balance >= amount:
+        if not self.banned:
             try:
-                self.balance = self.balance - amount
+                amount = int(amount)
+                self.balance = self.balance + amount
             except:
                 return f"Transaction failed: An error has occured."
             finally:
-                return f"Successfully withdrew ${amount}. {self.check_balance()}."
+                return f"Successfully deposited ${amount}. {self.check_balance()}."
         else:
-            return f"Amount does not exist in account. {self.check_balance()}"
+            return f"You are banned from using our banking system, please contact an Admin."
+
+    def withdraw(self, amount):
+        if not self.banned:
+            amount = int(amount)
+            if self.balance >= amount:
+                try:
+                    self.balance = self.balance - amount
+                except:
+                    return f"Transaction failed: An error has occured."
+                finally:
+                    return f"Successfully withdrew ${amount}. {self.check_balance()}."
+            else:
+                return f"Amount does not exist in account. {self.check_balance()}"
+        else:
+            return f"You are banned from using our banking system, please contact an Admin."
 
 
 class Admin(User):
