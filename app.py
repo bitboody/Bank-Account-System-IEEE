@@ -43,8 +43,7 @@ class User:
                     self.balance = self.balance - amount
                 except:
                     return f"Transaction failed: An error has occured."
-                finally:
-                    return f"Successfully withdrew ${amount}. {self.check_balance()}."
+                return f"Successfully withdrew ${amount}. {self.check_balance()}."
             else:
                 return f"Amount does not exist in account. {self.check_balance()}"
         else:
@@ -74,10 +73,10 @@ class Admin(User):
     def create_new_user(self, username, user_password, user_id, user_email):
         if "create_user" in self.permissions:
             if username in database:
-                print("Cannot create a new user with this username since it already exists.")
+                return "Cannot create a new user with this username since it already exists."
             else:
                 database.update({ username: { "profile": User(username, user_id, user_email), "password": user_password } })
-                print(f"New user created successfully: {database.get(username)}")
+                return f"New user created successfully: {database.get(username)}"
 
 
 database = {
@@ -106,19 +105,31 @@ def main(user_profile):
             case "balance":
                 print(user_profile.check_balance())
             case "deposit":
-                print(user_profile.deposit(user_input[1]))
+                if len(user_input) >= 2:
+                    print(user_profile.deposit(user_input[1]))
+                else:
+                    print("Not enough arguments supplied")
             case "withdraw":
-                print(user_profile.withdraw(user_input[1]))
+                if len(user_input) >= 2:
+                    print(user_profile.withdraw(user_input[1]))
+                else:
+                    print("Not enough arguments supplied")
             case "toggle_ban":
-                if user_type != "Admin":
-                    print("You do not have the permissions to perform this action.")
+                if len(user_input) >= 2:
+                    if user_type != "Admin":
+                        print("You do not have the permissions to perform this action.")
+                    else:
+                        print(user_profile.toggle_ban_user(database.get(user_input[1]).get("profile")))
                 else:
-                    print(user_profile.toggle_ban_user(database.get(user_input[1]).get("profile")))
+                    print("Not enough arguments supplied")
             case "create_new_user":
-                if user_type != "Admin":
-                    print("You do not have the permissions to perform this action.")
+                if len(user_input) >= 5:
+                    if user_type != "Admin":
+                        print("You do not have the permissions to perform this action.")
+                    else:
+                        print(user_profile.create_new_user(user_input[1], user_input[2], user_input[3], user_input[4]))
                 else:
-                    print(user_profile.create_new_user(user_input[1], user_input[2], user_input[3], user_input[4]))
+                    print("Not enough arguments supplied")
             case "exit":
                 print("Have a nice day!")
                 return
@@ -139,7 +150,7 @@ def login():
             username_login = database.get(username_login)
             password_login = input("Enter password: ")
 
-            if password_login in username_login.values():
+            if password_login in username_login["password"]:
                 user_profile = username_login.get("profile")
                 clearTerminal()
                 print("Logged in successfully!\n")
